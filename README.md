@@ -35,7 +35,7 @@ Installation
 - cd shopping-cart-user-service.
 - Restore NuGet packages.
 - Update the appsettings.json file with your database connection string.
-- Apply database migrations.
+- Apply database migrations:Add-Migration Initial -StartupProject UserService.Api -Project UserService.Infrastructure, Update database
 - Run the application.
   
 
