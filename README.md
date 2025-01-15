@@ -31,12 +31,12 @@ Prerequisites
 SQL Server (or compatible database)
 
 Installation
-- Clone this repository:
-- cd shopping-cart-user-service
-- Restore NuGet packages-
+- Clone this repository.
+- cd shopping-cart-user-service.
+- Restore NuGet packages.
 - Update the appsettings.json file with your database connection string.
-- Apply database migrations
-- Run the application
+- Apply database migrations.
+- Run the application.
   
 
 Contributing
