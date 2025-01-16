@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UserService.Application.DTO;
+using UserService.Domain.Models;
 
 namespace UserService.Application.Interfaces
 {
@@ -12,5 +13,6 @@ namespace UserService.Application.Interfaces
         Task RegisterUserAsync(RegisterUserDTO registerUserDTO);
         Task<UserDTO> AuthenticateUserAsync(AuthenticateUserDTO authenticateUserDTO);
         Task<string> GenerateJwtTokenAsync(UserDTO userDTO);
+        Task<User> GetUserProfileByEmailAsync(string email);
     }
 }

@@ -1,9 +1,4 @@
 ﻿using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UserService.Application.DTO;
 using UserService.Application.Interfaces;
 using UserService.Domain.Models;
@@ -33,7 +28,7 @@ namespace UserService.Application.Services
                 {
                     Name = registerUserDTO.Name,
                     Email = registerUserDTO.Email,
-                    PasswordHash = "hashedpassword"  
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword(registerUserDTO.Password)  // Password hashing
                 };
 
                 await _userRepository.AddUserAsync(user);
@@ -55,10 +50,10 @@ namespace UserService.Application.Services
 
                 var user = await _userRepository.GetUserByEmailAsync(authenticateUserDTO.Email);
 
-                if (user == null || authenticateUserDTO.Password != "correctpassword") 
+                if (user == null || !BCrypt.Net.BCrypt.Verify(authenticateUserDTO.Password, user.PasswordHash))  // Correct password verification
                 {
                     _logger.LogWarning("Authentication failed for user with email: {Email}", authenticateUserDTO.Email);
-                    return null; 
+                    return null;
                 }
 
                 _logger.LogInformation("User successfully authenticated with email: {Email}", authenticateUserDTO.Email);
@@ -67,7 +62,7 @@ namespace UserService.Application.Services
                 {
                     Name = user.Name,
                     Email = user.Email,
-                    Role = "User" 
+                    Role = user.Role ?? "User"
                 };
             }
             catch (Exception ex)
@@ -76,6 +71,7 @@ namespace UserService.Application.Services
                 throw new ApplicationException("An error occurred while authenticating the user. Please try again later.");
             }
         }
+
 
 
         public async Task<string> GenerateJwtTokenAsync(UserDTO userDTO)
@@ -93,5 +89,11 @@ namespace UserService.Application.Services
                 throw new ApplicationException("An error occurred while generating the JWT token. Please try again later.");
             }
         }
+
+        public async Task<User> GetUserProfileByEmailAsync(string email)
+        {
+            return await _userRepository.GetUserByEmailAsync(email);
+        }
+
     }
 }

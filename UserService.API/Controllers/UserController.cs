@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using UserService.Application.DTO;
 using UserService.Application.Interfaces;
 
@@ -26,12 +25,18 @@ namespace UserService.API.Controllers
                 await _userService.RegisterUserAsync(registerUserDTO);
                 return Ok(new { message = "User registered successfully." });
             }
+            catch (ApplicationException appEx)
+            {
+                _logger.LogWarning(appEx, "Registration failed for email: {Email}", registerUserDTO.Email);
+                return BadRequest(new { message = appEx.Message });
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error occurred while registering the user.");
-                return StatusCode(500, new { message = "An error occurred during registration." });
+                return StatusCode(500, new { message = "An unexpected error occurred during registration." });
             }
         }
+
 
         [HttpPost("authenticate")]
         public async Task<IActionResult> AuthenticateUser(AuthenticateUserDTO authenticateUserDTO)
@@ -54,42 +59,38 @@ namespace UserService.API.Controllers
                 return StatusCode(500, new { message = "An error occurred during authentication." });
             }
         }
-
         [HttpGet("profile")]
-        [Authorize(Policy = "UserPolicy")]
-        public IActionResult GetUserProfile()
+        public async Task<IActionResult> GetUserProfileByEmail([FromQuery] string email)
         {
             try
             {
-                var userId = User.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
-                if (string.IsNullOrEmpty(userId))
+                if (string.IsNullOrEmpty(email))
                 {
-                    _logger.LogWarning("User ID not found in claims.");
-                    return Unauthorized("User ID not found.");
+                    return BadRequest("Email is required.");
                 }
 
-                return Ok(new { message = $"Hello {userId}, this is your profile data." });
+                var user = await _userService.GetUserProfileByEmailAsync(email);
+                if (user == null)
+                {
+                    return NotFound("User not found.");
+                }
+
+                var userDTO = new UserDTO
+                {
+                    Name = user.Name,
+                    Email = user.Email,
+                    Role = user.Role
+                };
+
+                return Ok(userDTO);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred while retrieving user profile.");
-                return StatusCode(500, new { message = "An error occurred while fetching the profile data." });
+                _logger.LogError(ex, "Error occurred while fetching user profile.");
+                return StatusCode(500, new { message = "An error occurred while fetching the profile." });
             }
         }
 
-        [HttpGet("admin")]
-        [Authorize(Policy = "AdminPolicy")]
-        public IActionResult GetAdminData()
-        {
-            try
-            {
-                return Ok(new { message = "Admin data accessed." });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error occurred while retrieving admin data.");
-                return StatusCode(500, new { message = "An error occurred while fetching admin data." });
-            }
-        }
+
     }
 }
