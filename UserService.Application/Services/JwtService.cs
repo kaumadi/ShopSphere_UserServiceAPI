@@ -24,17 +24,17 @@ namespace UserService.Application.Services
 
                 var claims = new[]
                 {
-            new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Name, userDTO.Name),
-            new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Email, userDTO.Email),
-            new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Role, userDTO.Role),
-            new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.NameIdentifier, userDTO.Email),
-        };
+                    new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Name, userDTO.Name),
+                    new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Email, userDTO.Email),
+                    new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Role, userDTO.Role),
+                    new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.NameIdentifier, userDTO.Email),
+                };
 
-                var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:SecretKey"]));
+                var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtSettings:SecretKey"]));
                 var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-                var issuer = _configuration["Jwt:Issuer"];
-                var audience = _configuration["Jwt:Audience"];
+                var issuer = _configuration["JwtSettings:Issuer"];
+                var audience = _configuration["JwtSettings:Audience"];
 
                 if (string.IsNullOrEmpty(issuer) || string.IsNullOrEmpty(audience))
                 {

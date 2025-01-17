@@ -53,7 +53,7 @@ namespace UserService.Application.Services
                 if (user == null || !BCrypt.Net.BCrypt.Verify(authenticateUserDTO.Password, user.PasswordHash))  // Correct password verification
                 {
                     _logger.LogWarning("Authentication failed for user with email: {Email}", authenticateUserDTO.Email);
-                    return null;
+                    return new UserDTO();
                 }
 
                 _logger.LogInformation("User successfully authenticated with email: {Email}", authenticateUserDTO.Email);
@@ -79,9 +79,8 @@ namespace UserService.Application.Services
             try
             {
                 _logger.LogInformation("Generating JWT token for user: {Email}", userDTO.Email);
-
-                var token = "generated-jwt-token"; 
-                return await Task.FromResult(token);
+ 
+                return await _jwtService.GenerateJwtToken(userDTO);
             }
             catch (Exception ex)
             {
